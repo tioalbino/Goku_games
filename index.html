@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Goku System V3 | Multi-Device Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --console-body: #1a1a1a;
+      --screen-bg: #051005;
+      --terminal-green: #33ff00;
+      --terminal-dim: #1a8000;
+      --glow: 0 0 12px rgba(51, 255, 0, 0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: #000;
+      font-family: 'VT323', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--terminal-green);
+      padding: 10px;
+    }
+
+    /* --- ESTRUTURA RESPONSIVA --- */
+    .handheld-console {
+      width: 100%;
+      max-width: 1100px;
+      height: 85vh;
+      min-height: 500px;
+      background: var(--console-body);
+      border-radius: 40px;
+      padding: 20px;
+      display: flex;
+      align-items: stretch;
+      gap: 15px;
+      border: 4px solid #333;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      position: relative;
+    }
+
+    /* --- CONTROLES (Ocultam em telas pequenas) --- */
+    .side-controls {
+      width: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .d-pad { width: 80px; height: 80px; position: relative; opacity: 0.6; }
+    .d-pad div { background: #111; position: absolute; border: 1px solid #444; }
+    .d-pad-h { width: 100%; height: 30%; top: 35%; left: 0; border-radius: 4px; }
+    .d-pad-v { width: 30%; height: 100%; top: 0; left: 35%; border-radius: 4px; }
+
+    .action-buttons { width: 80px; height: 80px; position: relative; transform: rotate(-15deg); opacity: 0.6; }
+    .btn-circle { width: 28px; height: 28px; background: #111; border-radius: 50%; position: absolute; border: 1px solid #444; }
+
+    /* --- TELA (TERMINAL) --- */
+    .screen-bezel {
+      flex-grow: 1;
+      background: #000;
+      border-radius: 15px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 2px solid #222;
+    }
+
+    .crt-screen {
+      background-color: var(--screen-bg);
+      width: 100%;
+      height: 100%;
+      border-radius: 5px;
+      position: relative;
+      overflow-y: auto;
+      padding: 15px;
+      border: 1px solid var(--terminal-dim);
+    }
+
+    /* Efeito de Linhas de TV Antiga */
+    .crt-screen::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* --- CONTEÚDO --- */
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: clamp(0.8rem, 4vw, 1.3rem);
+      text-align: center;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .game-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid var(--terminal-green);
+      background: rgba(0, 255, 0, 0.05);
+      text-decoration: none;
+      color: inherit;
+      transition: 0.2s;
+      z-index: 10;
+      position: relative;
+    }
+
+    .game-link:hover, .game-link:active {
+      background: var(--terminal-green);
+      color: #000;
+      box-shadow: var(--glow);
+    }
+
+    .game-label { font-size: 1.3rem; font-weight: bold; }
+    .game-type { font-size: 0.9rem; opacity: 0.7; }
+
+    .status-bar {
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--terminal-dim);
+      margin-bottom: 15px;
+      padding-bottom: 5px;
+    }
+
+    .blink { animation: blinker 1s linear infinite; }
+    @keyframes blinker { 50% { opacity: 0; } }
+
+    /* --- ADAPTAÇÃO PARA CELULARES (Media Queries) --- */
+    @media (max-width: 768px) {
+      body { padding: 0; }
+      
+      .handheld-console {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+        padding: 5px;
+      }
+
+      .side-controls { display: none; } /* Remove controles no celular */
+
+      .screen-bezel {
+        border-radius: 0;
+        padding: 0;
+      }
+
+      .crt-screen {
+        border-radius: 0;
+        border: none;
+      }
+
+      .game-link { padding: 20px 15px; } /* Botões maiores para o dedo */
+    }
+
+    /* Tablets e telas médias */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .handheld-console { width: 98%; height: 70vh; }
+        .side-controls { width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="handheld-console">
+    
+    <div class="side-controls">
+      <div class="d-pad">
+        <div class="d-pad-h"></div>
+        <div class="d-pad-v"></div>
+      </div>
+    </div>
+
+    <div class="screen-bezel">
+      <div class="crt-screen">
+        
+        <div class="status-bar">
+          <span>SYS: ONLINE</span>
+          <span class="blink">● RECORDING</span>
+          <span id="clock">00:00</span>
+        </div>
+
+        <h1>GOKU GAMES SYSTEM</h1>
+        
+        <p style="text-align: center; font-size: 1.1rem; margin-bottom: 10px;">
+          > SELECIONE O SOFTWARE PARA INICIAR:
+        </p>
+
+        <div class="games-grid">
+          
+          <a href="https://geometry-dash-l7ip9ev8q-albino-corp.vercel.app/" target="_blank" class="game-link">
+            <div>
+              <div class="game-label">Geometry Dash</div>
+              <div class="game-type">PLAY GAME </div>
+            </div>
+            <i class="fas fa-play"></i>
+          </a>
+
+        </div>
+
+        <div style="margin-top: 30px; border-top: 1px solid var(--terminal-dim); padding-top: 10px;">
+          <a href="index.html" style="color: var(--terminal-dim); text-decoration: none; font-size: 1rem;">
+            [ ESC ] EXIT_TO_MAIN_MENU
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="side-controls">
+      <div class="action-buttons">
+        <div class="btn-circle" style="top:0; left:25px;"></div>
+        <div class="btn-circle" style="top:25px; left:0;"></div>
+        <div class="btn-circle" style="top:25px; left:50px;"></div>
+        <div class="btn-circle" style="top:50px; left:25px;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Relógio simples no topo da tela do terminal
+    function updateClock() {
+      const now = new Date();
+      const time = now.getHours().toString().padStart(2, '0') + ":" + 
+                   now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = time;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
